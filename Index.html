@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Hello, world!</title>
+  </head>
+  <body>
+    <div class="container">
+      <h1>ChristmaSelfies</h1>
+      <canvas id="canvas" width="640" height="640"></canvas>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+      let faceImage = "https://lh3.googleusercontent.com/LUK51lPVHdnBkd7OyJ2NOyoVMyJaipQXL8yZ8rBzOSaD5S8GyEwMmsgxq_euTiHT8pSN0ndcCNyoC_Pnp9upYGxylBMp0lBXl6dHmXRWv0G4FZLwjeBN8L920MsW_XY3Fv2rG89HeKSoXOgp_2hTATWOoxz1q5ghRJSOpDNXIUY-rKtDvZZ8gGph6Zs1I0JQ9iEmrbc28twHNp7ECri7KZk7ai4Z6k_V_pGQJPoqO6SwSgDL4EnYxSaS6v_hc0AeTD6_mPcV-va7FN697jMCA-T2zkWjbpHSgGGyNtZVBiagrZ_YhYF93th__kvOAjxRtDLPFDHxGpt8LRqMG_1LSE4hM8Gw0i7yUDg6x3tWzz8fkSF09302DKmfUbYnOO8L1bR-753y4Oz6tZ2hM3cz0C5lEfNXBOXLwOcwlPfqI2P4u3hnQy01dzqh0lzi0PNPtWbAcD31HZRaXoA9zgCgxznNprWs9IP5EyUDikIzWXEjR2DBnbGwHw_Au4DbJGdtFOi-gA7HuxbIlWR94S1YzKs4caQfvrL1B0zJUgh77PWcuxxhED2E8Vwl7WlZhZPTPKy6VMr53PvC1UjpgrLafVRzttjLJQyFt6FjhJ6ADXs6tKogPCTgxomW22gK-JnXI2Ezs-fZz0JqGz9p_BHkcln7pHaW-ttnImGQgnDmTx_kW6AUPewppBaTJDJln-s=w1730-h1297-no?authuser=0";//brian
+      //let faceImage = "https://www.leonardodavinci.net/images/gallery/the-mona-lisa.jpg";
+      //let faceImage = "https://images-na.ssl-images-amazon.com/images/I/71Zy0yoxrdL._SY741_.jpg";
+      let scaleRatio = 0;
+      let apikey = "";
+      fetch( "http://localhost:1225/apikey" )
+      .then( r => r.json() )
+      .then( async r => {
+        apikey = r.key;
+        let attributes = await detectFace( apikey, faceImage );
+        console.log( attributes );
+
+        attributes.forEach( f => {
+          switch( Math.floor( 2 * Math.random() ) ) {
+            case 0:
+              drawRudolph( f );
+              break;
+            case 1:
+              drawSanta( f );
+              break;
+            case 2:
+              drawRudolph( f );
+              // drawBabaYoda( f );
+              break;
+          }
+        } );
+      } );
+
+      function drawRudolph( face ) {
+        let noseSize = 1.25 * ( face.faceLandmarks.noseRightAlarOutTip.x - face.faceLandmarks.noseLeftAlarOutTip.x );
+        drawImageToCanvas( "http://localhost:1225/web/rednose.png", face.faceLandmarks.noseTip.x - noseSize / 2, face.faceLandmarks.noseTip.y - noseSize / 2, noseSize, noseSize );
+        let antlerSize = 1.5 * ( face.faceLandmarks.eyebrowRightOuter.x - face.faceLandmarks.eyebrowLeftOuter.x );
+        let antlerLeftY = 1.25 * ( face.faceLandmarks.eyebrowLeftOuter.y - face.faceLandmarks.eyeLeftOuter.y );
+        drawImageToCanvas( "http://localhost:1225/web/antlerLeft.png", face.faceLandmarks.eyebrowLeftOuter.x - antlerSize * 0.75, face.faceLandmarks.eyebrowLeftOuter.y + antlerLeftY - antlerSize, antlerSize, antlerSize );
+        let antlerRightY = 1.25 * ( face.faceLandmarks.eyebrowRightOuter.y - face.faceLandmarks.eyeRightOuter.y );
+        drawImageToCanvas( "http://localhost:1225/web/antlerRight.png", face.faceLandmarks.eyebrowRightOuter.x - antlerSize * 0.25, face.faceLandmarks.eyebrowRightOuter.y + antlerLeftY - antlerSize, antlerSize, antlerSize );
+      }
+
+      function drawSanta( face ) {
+        let beardSize = 2.5 * ( face.faceLandmarks.mouthRight.x - face.faceLandmarks.mouthLeft.x );
+        let beardX = face.faceLandmarks.mouthLeft.x + ( face.faceLandmarks.mouthRight.x - face.faceLandmarks.mouthLeft.x ) / 2;
+        let beardY = face.faceLandmarks.mouthLeft.y + ( face.faceLandmarks.mouthRight.y - face.faceLandmarks.mouthLeft.y ) / 2;
+        drawImageToCanvas( "http://localhost:1225/web/santaBeard.png", beardX - beardSize / 2, beardY - beardSize * 0.15, beardSize, beardSize );
+        let hatSize = 1.5 * ( face.faceLandmarks.eyebrowRightOuter.x - face.faceLandmarks.eyebrowLeftOuter.x );
+        let hatX = face.faceLandmarks.eyebrowLeftOuter.x + ( face.faceLandmarks.eyebrowRightOuter.x - face.faceLandmarks.eyebrowLeftOuter.x ) / 2;
+        let hatY = face.faceLandmarks.eyebrowLeftOuter.y + ( face.faceLandmarks.eyebrowRightOuter.y - face.faceLandmarks.eyebrowLeftOuter.y ) / 2;
+        setTimeout( () => {
+          drawImageToCanvas( "http://localhost:1225/web/santaHat.png", hatX - hatSize / 2, hatY - hatSize * 0.85, hatSize, hatSize );
+        }, 200 );
+      }
+
+      function drawBabaYoda( face ) {
+        let hatSize = 2.5 * ( face.faceLandmarks.pupilRight.x - face.faceLandmarks.pupilLeft.x );
+        let hatX = face.faceLandmarks.pupilLeft.x + ( face.faceLandmarks.pupilRight.x - face.faceLandmarks.pupilLeft.x ) / 2;
+        let hatY = face.faceLandmarks.pupilLeft.y + ( face.faceLandmarks.pupilRight.y - face.faceLandmarks.pupilLeft.y ) / 2;
+        drawImageToCanvas( "http://localhost:1225/web/babayoda.png", hatX - hatSize * 2.4 / 2, hatY - hatSize * 0.4, hatSize * 2.4, hatSize );
+      }
+
+      drawImageToCanvas(faceImage,0,0);
+
+      async function detectFace(apiKey, imageUrl) {
+        let result = await fetch("https://westeurope.api.cognitive.microsoft.com/face/v1.0/detect?returnFaceId=true&returnFaceLandmarks=true&recognitionModel=recognition_01&returnRecognitionModel=false&detectionModel=detection_01", {
+          method: 'POST',
+          headers: {
+            "Content-Type": "application/json",
+            "Ocp-Apim-Subscription-Key": "927ff495e6674870a77d26bd04107719"//should be apikey!!
+          },
+          body: JSON.stringify({
+          url: imageUrl
+        })
+      }).then(r => r.json());
+      return result;
+      }
+
+      function drawImageToCanvas(url, x, y, width=0, height = 0) {
+        var myCanvas = document.getElementById('canvas');
+        var ctx = myCanvas.getContext('2d');
+        var img = new Image;
+        img.onload = function(){
+          if( !scaleRatio ) {
+            scaleRatio = 640 / img.width;
+            if( width && height ) {
+              ctx.drawImage( img, x, y, width, height );
+            }
+            else {
+              ctx.drawImage( img, x, y, img.width * scaleRatio, img.height * scaleRatio );
+            }
+          }
+          else {
+            if( width && height ) {
+              ctx.drawImage( img, x * scaleRatio, y * scaleRatio, width * scaleRatio, height * scaleRatio );
+            }
+            else {
+              ctx.drawImage( img, x * scaleRatio, y * scaleRatio );
+            }
+          }
+        };
+        img.src = url;
+      }
+    </script>
+  </body>
+</html>
